@@ -1,0 +1,225 @@
+import { useState } from 'react';
+import { AlertTriangle, Info, ShieldAlert, RotateCcw, MessageSquare, ShieldCheck, ChevronDown } from 'lucide-react';
+import type { ImpactLevel } from '../App';
+import { FeedbackModal } from './FeedbackModal';
+
+interface ResultsSectionProps {
+  impactLevel: ImpactLevel;
+  onRestart: () => void;
+}
+
+const impactConfig = {
+  'nao-sensivel': {
+    title: 'Fora do Escopo de Análise',
+    description: 'A plataforma Ethos está direcionada para dilemas de confidencialidade e dados sensíveis. No momento, não podemos analisar outros tipos de dilema.',
+    icon: Info,
+    iconBgColor: 'bg-muted',
+    recommendations: [],
+    additionalInfo: []
+  },
+  'risco-regulatorio': {
+    title: 'Risco de Conformidade',
+    description: 'Práticas sem transparência adequada ou com coação podem resultar em multas da ANPD (LGPD) de até R$ 50 milhões por infração.',
+    icon: ShieldAlert,
+    iconBgColor: 'bg-destructive',
+    recommendations: [
+      'Revisar comunicações/consentimento',
+      'Reforçar explicação em linguagem simples',
+      'Reavaliar necessidades dos dados',
+      'Registrar motivos de não-validação',
+      'Validar com Jurídico (Multas e LGPD)'
+    ],
+    additionalInfo: [
+      { label: 'Nível de Urgência', value: 'Imediato' },
+      { label: 'Tipo de Ação', value: 'Revisão jurídica' }
+    ]
+  },
+  'uso-aceitavel': {
+    title: 'Uso Conforme',
+    description: 'O uso dos dados está conforme os padrões recomendados. Mantenha as boas práticas de proteção e transparência.',
+    icon: ShieldCheck,
+    iconBgColor: 'bg-chart-2',
+    recommendations: [
+      'Registrar finalidade dos dados',
+      'Documentar riscos e proteções',
+      'Monitorar impacto',
+      'Revisar periodicamente'
+    ],
+    additionalInfo: [
+      { label: 'Nível de Conformidade', value: 'Adequado' },
+      { label: 'Tipo de Ação', value: 'Manutenção' }
+    ]
+  },
+  'uso-cuidado': {
+    title: 'Uso Conforme, com Monitoramento Especial',
+    description: 'O uso dos dados é conforme, mas devido à natureza dos riscos, é necessário maior atenção e monitoramento.',
+    icon: AlertTriangle,
+    iconBgColor: 'bg-chart-3',
+    recommendations: [
+      'Revisão jurídica adicional',
+      'Monitoramento mais rigoroso'
+    ],
+    additionalInfo: [
+      { label: 'Nível de Atenção', value: 'Elevado' },
+      { label: 'Tipo de Ação', value: 'Monitoramento' }
+    ]
+  }
+};
+
+export function ResultsSection({ impactLevel, onRestart }: ResultsSectionProps) {
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [showWhyRecommendation, setShowWhyRecommendation] = useState(false);
+
+  if (!impactLevel) return null;
+
+  const config = impactConfig[impactLevel];
+  const Icon = config.icon;
+
+  const handleOpenFeedback = () => {
+    setShowFeedbackModal(true);
+  };
+
+  const handleCloseFeedback = () => {
+    setShowFeedbackModal(false);
+  };
+
+  const toggleWhyRecommendation = () => {
+    setShowWhyRecommendation(!showWhyRecommendation);
+  };
+
+  return (
+    <>
+      <section 
+        className="py-12 sm:py-16 lg:py-20 bg-background" 
+        id="results"
+        aria-labelledby="results-heading"
+      >
+        <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 id="results-heading" className="text-foreground">Resultado da Análise</h2>
+          </div>
+
+          {/* Result Card */}
+          <div 
+            className="bg-background shadow-sm border border-border mb-8 sm:mb-12 overflow-hidden"
+            style={{ borderRadius: 'calc(var(--radius) + 8px)' }}
+            role="article"
+            aria-labelledby="result-title"
+          >
+            <div className="grid lg:grid-cols-[1fr_200px]">
+              {/* Left Content */}
+              <div className="p-6 sm:p-8">
+                <h3 id="result-title" className="mb-4 sm:mb-6">{config.title}</h3>
+                
+                <p className="text-foreground mb-6 sm:mb-8" style={{ fontSize: '16px', lineHeight: '1.7' }}>
+                  {config.description}
+                </p>
+
+                {config.recommendations.length > 0 && (
+                  <button
+                    onClick={toggleWhyRecommendation}
+                    className="flex items-center gap-2 text-primary hover:underline mb-6 sm:mb-8 focus:outline-none focus:ring-2 focus:ring-ring"
+                    style={{ 
+                      fontSize: '16px',
+                      padding: '4px 8px',
+                      borderRadius: 'var(--radius)'
+                    }}
+                    aria-expanded={showWhyRecommendation}
+                    aria-controls="recommendations-section"
+                  >
+                    <ChevronDown 
+                      size={20} 
+                      aria-hidden="true"
+                      className={`transition-transform ${showWhyRecommendation ? 'rotate-180' : ''}`}
+                    />
+                    Ver ações recomendadas
+                  </button>
+                )}
+
+                {showWhyRecommendation && config.recommendations.length > 0 && (
+                  <div 
+                    id="recommendations-section"
+                    className="mb-6 sm:mb-8 p-4 sm:p-6 bg-primary/5 border border-primary/20" 
+                    style={{ borderRadius: 'var(--radius)' }}
+                  >
+                    <h4 className="mb-4">Ações Recomendadas</h4>
+                    <ul className="space-y-3" role="list">
+                      {config.recommendations.map((rec, index) => (
+                        <li key={index} className="flex items-start gap-3">
+                          <div 
+                            className="mt-1.5 w-2 h-2 rounded-full bg-primary flex-shrink-0" 
+                            aria-hidden="true"
+                          />
+                          <span className="text-foreground" style={{ fontSize: '16px', lineHeight: '1.6' }}>{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Additional Info Grid */}
+                {config.additionalInfo.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                    {config.additionalInfo.map((info, index) => (
+                      <div key={index}>
+                        <h4 className="mb-2">{info.label}</h4>
+                        <p className="text-foreground" style={{ fontSize: '16px' }}>{info.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Right Icon Area */}
+              <div 
+                className={`${config.iconBgColor} flex items-center justify-center p-8 lg:p-8 min-h-[200px] lg:min-h-0`}
+                aria-hidden="true"
+              >
+                <Icon size={80} className="text-white" strokeWidth={1.5} />
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <button
+              onClick={onRestart}
+              className="flex-1 flex items-center justify-center gap-3 py-4 bg-primary text-primary-foreground hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              style={{ borderRadius: 'var(--radius)', fontSize: '16px' }}
+              aria-label="Reiniciar o questionário e realizar nova análise"
+            >
+              <RotateCcw size={20} aria-hidden="true" />
+              Realizar Nova Análise
+            </button>
+            <button
+              onClick={handleOpenFeedback}
+              className="flex-1 flex items-center justify-center gap-3 py-4 border border-border bg-background hover:bg-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+              style={{ borderRadius: 'var(--radius)', fontSize: '16px' }}
+              aria-label="Abrir formulário para enviar contribuição sobre a plataforma"
+            >
+              <MessageSquare size={20} aria-hidden="true" />
+              Enviar Contribuição
+            </button>
+          </div>
+
+          {/* Disclaimer */}
+          <div className="mt-8 sm:mt-12 p-4 sm:p-6 bg-card" style={{ borderRadius: 'var(--radius)' }}>
+            <p className="text-foreground text-center" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+              <strong>Importante:</strong> Este resultado é baseado em suas respostas e serve como 
+              ferramenta educacional. Não substitui orientação profissional especializada em ética 
+              médica ou jurídica.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Feedback Modal */}
+      {showFeedbackModal && (
+        <FeedbackModal 
+          questionNumber={0} 
+          onClose={handleCloseFeedback}
+        />
+      )}
+    </>
+  );
+}

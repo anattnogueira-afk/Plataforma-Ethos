@@ -1,0 +1,21 @@
+import { MessageCircle } from 'lucide-react';
+
+interface FloatingFeedbackButtonProps {
+  onClick: () => void;
+}
+
+export function FloatingFeedbackButton({ onClick }: FloatingFeedbackButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      className="fixed bottom-8 right-8 w-16 h-16 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 transition-transform z-50 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-ring"
+      style={{
+        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)'
+      }}
+      aria-label="Abrir formulário de feedback"
+      title="Enviar feedback"
+    >
+      <MessageCircle size={28} aria-hidden="true" />
+    </button>
+  );
+}

@@ -1,0 +1,126 @@
+import { Menu, X } from 'lucide-react';
+import { useState } from 'react';
+
+interface HeaderProps {
+  onNavigate: (sectionId: string) => void;
+  onStartQuiz: () => void;
+}
+
+export function Header({ onNavigate, onStartQuiz }: HeaderProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const menuItems = [
+    { label: 'Como Funciona', id: 'como-funciona' },
+    { label: 'Sobre Ética na Telemedicina', id: 'sobre-etica' },
+    { label: 'Contato', id: 'contato' }
+  ];
+
+  const handleNavClick = (id: string) => {
+    onNavigate(id);
+    setMobileMenuOpen(false);
+  };
+
+  return (
+    <header className="sticky top-0 z-50 bg-background border-b border-border" role="banner">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <div className="flex items-center">
+            <button 
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              style={{ 
+                fontSize: '20px', 
+                fontWeight: 'var(--font-weight-bold)',
+                borderRadius: 'var(--radius)'
+              }}
+              aria-label="Voltar ao início da página"
+            >
+              Ethos
+            </button>
+          </div>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-6 xl:gap-8" aria-label="Navegação principal">
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id)}
+                className="text-foreground hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-ring whitespace-nowrap"
+                style={{ 
+                  fontSize: '16px',
+                  padding: '4px 8px',
+                  borderRadius: 'var(--radius)'
+                }}
+                aria-label={`Navegar para ${item.label}`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+
+          {/* Desktop CTA */}
+          <div className="hidden lg:block">
+            <button
+              onClick={onStartQuiz}
+              className="px-6 py-3 bg-primary text-primary-foreground hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 whitespace-nowrap"
+              style={{ borderRadius: 'var(--radius)' }}
+              aria-label="Começar teste de ética em telemedicina"
+            >
+              Começar Teste
+            </button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 hover:bg-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+            style={{ borderRadius: 'var(--radius)' }}
+            aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-navigation"
+          >
+            {mobileMenuOpen ? <X size={24} aria-hidden="true" /> : <Menu size={24} aria-hidden="true" />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <nav 
+            id="mobile-navigation"
+            className="lg:hidden py-4 border-t border-border" 
+            aria-label="Navegação mobile"
+          >
+            <div className="flex flex-col gap-4">
+              {menuItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavClick(item.id)}
+                  className="text-left py-3 px-4 text-foreground hover:text-primary hover:bg-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+                  style={{ 
+                    fontSize: '16px',
+                    borderRadius: 'var(--radius)'
+                  }}
+                  aria-label={`Navegar para ${item.label}`}
+                >
+                  {item.label}
+                </button>
+              ))}
+              <button
+                onClick={() => {
+                  onStartQuiz();
+                  setMobileMenuOpen(false);
+                }}
+                className="px-6 py-3 bg-primary text-primary-foreground hover:opacity-90 transition-opacity text-center focus:outline-none focus:ring-2 focus:ring-ring"
+                style={{ borderRadius: 'var(--radius)' }}
+                aria-label="Começar teste de ética em telemedicina"
+              >
+                Começar Teste
+              </button>
+            </div>
+          </nav>
+        )}
+      </div>
+    </header>
+  );
+}

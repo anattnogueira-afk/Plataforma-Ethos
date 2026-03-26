@@ -1,0 +1,286 @@
+import { useState } from 'react';
+import { AlertCircle } from 'lucide-react';
+import type { ImpactLevel } from '../App';
+
+interface Question {
+  id: number;
+  title: string;
+  description: string;
+}
+
+const questions: Question[] = [
+  {
+    id: 1,
+    title: 'Essa funcionalidade envolve dados sensíveis dos usuários?',
+    description: 'Exemplo: saúde, localização, hábitos, histórico de uso',
+  },
+  {
+    id: 2,
+    title: 'O usuário tem ciência do que estamos fazendo com os dados?',
+    description: 'Finalidade, quem tem acesso, quanto tempo ficam armazenados',
+  },
+  {
+    id: 3,
+    title: 'Os riscos e as medidas de proteção foram comunicados de forma compreensível?',
+    description: 'Riscos: vazamento, uso indevido, perfilamento, perda de privacidade. Medidas: criptografia, acesso limitado, anonimização',
+  },
+  {
+    id: 4,
+    title: 'Há declarações de cooperação ou incentivo indevido para o usuário compartilhar dados?',
+    description: 'Exemplo: Bloqueio de acesso, desconto condicionado, sorteio vinculado à coleta',
+  },
+  {
+    id: 5,
+    title: 'A forma como usamos esses dados implica risco relevante imediato para o usuário?',
+    description: 'Exemplo: Identificação de pessoas vulneráveis, risco de discriminação, impacto em decisões éticas',
+  }
+];
+
+interface QuestionnaireProps {
+  onComplete: (impactLevel: ImpactLevel) => void;
+}
+
+export function QuestionnaireSection({ onComplete }: QuestionnaireProps) {
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [answers, setAnswers] = useState<Record<number, 'sim' | 'nao'>>({});
+  const [showError, setShowError] = useState(false);
+  const [totalQuestions] = useState(5);
+
+  const question = questions[currentQuestion];
+  const hasAnswer = answers[question.id] !== undefined;
+  
+  const progress = ((currentQuestion + 1) / totalQuestions) * 100;
+
+  const handleAnswerChange = (value: 'sim' | 'nao') => {
+    setAnswers({ ...answers, [question.id]: value });
+    setShowError(false);
+  };
+
+  const determineResult = (): ImpactLevel => {
+    if (answers[1] === 'nao') {
+      return 'nao-sensivel';
+    }
+
+    if (answers[2] === 'nao') {
+      return 'risco-regulatorio';
+    }
+
+    if (answers[3] === 'nao') {
+      return 'risco-regulatorio';
+    }
+
+    if (answers[4] === 'sim') {
+      return 'risco-regulatorio';
+    }
+
+    if (answers[5] === 'nao') {
+      return 'uso-aceitavel';
+    }
+
+    if (answers[5] === 'sim') {
+      return 'uso-cuidado';
+    }
+
+    return null;
+  };
+
+  const handleNext = () => {
+    if (!hasAnswer) {
+      setShowError(true);
+      return;
+    }
+
+    const currentAnswer = answers[question.id];
+
+    // Lógica da árvore de decisão
+    if (currentQuestion === 0) {
+      if (currentAnswer === 'nao') {
+        onComplete('nao-sensivel');
+        return;
+      } else {
+        setCurrentQuestion(1);
+        setShowError(false);
+        return;
+      }
+    }
+
+    if (currentQuestion === 1) {
+      if (currentAnswer === 'nao') {
+        onComplete('risco-regulatorio');
+        return;
+      } else {
+        setCurrentQuestion(2);
+        setShowError(false);
+        return;
+      }
+    }
+
+    if (currentQuestion === 2) {
+      if (currentAnswer === 'nao') {
+        onComplete('risco-regulatorio');
+        return;
+      } else {
+        setCurrentQuestion(3);
+        setShowError(false);
+        return;
+      }
+    }
+
+    if (currentQuestion === 3) {
+      if (currentAnswer === 'sim') {
+        onComplete('risco-regulatorio');
+        return;
+      } else {
+        setCurrentQuestion(4);
+        setShowError(false);
+        return;
+      }
+    }
+
+    if (currentQuestion === 4) {
+      const result = determineResult();
+      onComplete(result);
+      return;
+    }
+  };
+
+  return (
+    <section 
+      id="questionnaire" 
+      className="py-12 sm:py-16 lg:py-20 bg-background"
+      aria-labelledby="questionnaire-title"
+    >
+      <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
+        {/* Progress Bar */}
+        <div className="mb-8 sm:mb-12">
+          <div className="flex justify-between items-center mb-3">
+            <span 
+              className="text-foreground" 
+              style={{ fontSize: '14px', fontWeight: 'var(--font-weight-medium)' }}
+              id="questionnaire-progress"
+              aria-live="polite"
+            >
+              Questão {currentQuestion + 1} de {totalQuestions}
+            </span>
+            <span 
+              className="text-muted-foreground" 
+              style={{ fontSize: '14px' }}
+              aria-label={`${Math.round(progress)} por cento completo`}
+            >
+              {Math.round(progress)}%
+            </span>
+          </div>
+          <div 
+            className="w-full bg-secondary overflow-hidden" 
+            style={{ 
+              height: '12px', 
+              borderRadius: 'var(--radius)' 
+            }}
+            role="progressbar"
+            aria-valuenow={Math.round(progress)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-labelledby="questionnaire-progress"
+          >
+            <div
+              className="bg-primary h-full transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Question Card */}
+        <div 
+          className="p-6 sm:p-8 shadow-sm border border-border"
+          style={{ 
+            backgroundColor: '#f0f4f9',
+            borderRadius: 'calc(var(--radius) + 8px)' 
+          }}
+        >
+          <div 
+            className="mb-3 text-primary" 
+            style={{ fontSize: '14px', fontWeight: 'var(--font-weight-medium)' }}
+          >
+            Análise de Dilema Ético em Telemedicina
+          </div>
+          
+          <h2 id="questionnaire-title" className="mb-4">{question.title}</h2>
+          
+          <p className="text-foreground mb-6 sm:mb-8" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+            {question.description}
+          </p>
+
+          {/* Answer Options - Sim/Não */}
+          <fieldset className="mb-6 sm:mb-8">
+            <legend className="sr-only">Selecione sua resposta</legend>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <button
+                onClick={() => handleAnswerChange('sim')}
+                className={`p-4 sm:p-6 border transition-all bg-background focus:outline-none focus:ring-4 focus:ring-ring ${
+                  answers[question.id] === 'sim'
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                }`}
+                style={{ borderRadius: 'var(--radius)' }}
+                aria-pressed={answers[question.id] === 'sim'}
+                aria-label="Responder Sim"
+              >
+                <span className="block" style={{ fontSize: '18px', fontWeight: 'var(--font-weight-medium)' }}>Sim</span>
+              </button>
+              
+              <button
+                onClick={() => handleAnswerChange('nao')}
+                className={`p-4 sm:p-6 border transition-all bg-background focus:outline-none focus:ring-4 focus:ring-ring ${
+                  answers[question.id] === 'nao'
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                }`}
+                style={{ borderRadius: 'var(--radius)' }}
+                aria-pressed={answers[question.id] === 'nao'}
+                aria-label="Responder Não"
+              >
+                <span className="block" style={{ fontSize: '18px', fontWeight: 'var(--font-weight-medium)' }}>Não</span>
+              </button>
+            </div>
+          </fieldset>
+
+          {/* Error Message */}
+          {showError && (
+            <div 
+              className="flex items-center gap-3 text-destructive mb-6 sm:mb-8 p-4 bg-destructive/10" 
+              style={{ borderRadius: 'var(--radius)' }}
+              role="alert"
+              aria-live="assertive"
+            >
+              <AlertCircle size={20} aria-hidden="true" className="flex-shrink-0" />
+              <span style={{ fontSize: '16px' }}>
+                Por favor, responda a pergunta antes de continuar.
+              </span>
+            </div>
+          )}
+
+          {/* Action Button */}
+          <div className="flex justify-center">
+            <button
+              onClick={handleNext}
+              disabled={!hasAnswer}
+              className={`w-full sm:w-auto px-8 py-4 transition-all focus:outline-none focus:ring-4 focus:ring-ring ${
+                hasAnswer
+                  ? 'bg-primary text-primary-foreground hover:opacity-90'
+                  : 'bg-muted text-muted-foreground cursor-not-allowed'
+              }`}
+              style={{ 
+                borderRadius: 'var(--radius)',
+                fontSize: '16px'
+              }}
+              aria-disabled={!hasAnswer}
+              aria-label={currentQuestion < questions.length - 1 ? 'Avançar para próxima questão' : 'Ver análise da simulação'}
+            >
+              {currentQuestion < questions.length - 1 ? 'Próxima Questão' : 'Ver Análise'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

@@ -1,0 +1,54 @@
+export function Footer() {
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <footer className="bg-card border-t border-border py-8 sm:py-12" role="contentinfo">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="text-foreground text-center md:text-left" style={{ fontSize: '14px' }}>
+            © {currentYear} Ethos. Todos os direitos reservados.
+          </div>
+          
+          <nav className="flex flex-wrap justify-center gap-6 sm:gap-8" aria-label="Navegação do rodapé">
+            <a 
+              href="#como-funciona"
+              className="text-foreground hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-ring whitespace-nowrap"
+              style={{ 
+                fontSize: '14px',
+                padding: '4px 8px',
+                borderRadius: 'var(--radius)'
+              }}
+              aria-label="Ir para seção Como Funciona"
+            >
+              Como Funciona
+            </a>
+            <a 
+              href="#sobre-etica"
+              className="text-foreground hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-ring whitespace-nowrap"
+              style={{ 
+                fontSize: '14px',
+                padding: '4px 8px',
+                borderRadius: 'var(--radius)'
+              }}
+              aria-label="Ir para seção Sobre Ética"
+            >
+              Sobre Ética
+            </a>
+            <a 
+              href="#contato"
+              className="text-foreground hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-ring whitespace-nowrap"
+              style={{ 
+                fontSize: '14px',
+                padding: '4px 8px',
+                borderRadius: 'var(--radius)'
+              }}
+              aria-label="Ir para seção Contato"
+            >
+              Contato
+            </a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+  );
+}
